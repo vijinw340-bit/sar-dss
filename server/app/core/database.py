@@ -11,7 +11,23 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 
 from app.core.config import settings
 
-DATABASE_URL = settings.DATABASE_URL
+def _normalize_url(url: str) -> str:
+    """Map generic postgres URLs to the installed psycopg v3 dialect.
+
+    Hosted providers (Railway, Render, Neon...) expose DATABASE_URL as
+    ``postgres://`` or ``postgresql://``. SQLAlchemy would then try the
+    psycopg2 driver, which is not installed - rewrite to ``psycopg`` v3.
+    """
+    if url.startswith("postgres://"):
+        url = "postgresql+psycopg://" + url[len("postgres://"):]
+    elif url.startswith("postgresql://"):
+        url = "postgresql+psycopg://" + url[len("postgresql://"):]
+    elif url.startswith("postgresql+psycopg2://"):
+        url = "postgresql+psycopg://" + url[len("postgresql+psycopg2://"):]
+    return url
+
+
+DATABASE_URL = _normalize_url(settings.DATABASE_URL)
 
 # SQLite needs check_same_thread disabled when used across threads.
 connect_args = (
@@ -49,6 +65,17 @@ def ensure_postgis_geometry() -> None:
     for advanced spatial queries on production deployments.
     """
     if not engine.url.get_backend_name().startswith("postgres"):
+        return
+    # PostGIS is optional: hosted Postgres often lacks the extension.
+    # The app runs fully on plain float/GeoJSON columns; spatial columns
+    # are a bonus. Never let this fail application startup.
+    try:
+        from sqlalchemy import text
+
+        with engine.begin() as conn:
+            conn.execute(text("CREATE EXTENSION IF NOT EXISTS postgis"))
+    except Exception as exc:  # noqa: BLE001 - portability over strictness
+        print(f"[db] PostGIS unavailable, skipping spatial columns: {exc}")
         return
     from sqlalchemy import text
 
