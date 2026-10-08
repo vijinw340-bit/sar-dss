@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+
+# Environment
+.env
+.env.local
+.env.production
+.env.development
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test / coverage
+coverage/
+.pytest_cache/
+htmlcov/
+
+# Local databases (SQLite dev files contain real mission data)
+*.db
+*.sqlite
+*.sqlite3
+
+# Static map caches / report files
+server/reports/
+server/static/mapcache/
+*.pdf.tmp
+
+# Uploads
+server/uploads/
+
+# VPN scripts
+scripts/configs/
+scripts/.vpn-state.json
+scripts/logs/
+scripts/secrets/vpn.auth
+!scripts/secrets/vpn.auth.example
