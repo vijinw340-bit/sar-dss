@@ -45,6 +45,10 @@ class UserUpdate(BaseModel):
     phone: Optional[str] = None
     role: Optional[str] = None
     is_active: Optional[bool] = None
+    # Admin-only credential rotation (handled explicitly in the router:
+    # username is uniqueness-checked, password is bcrypt-hashed).
+    username: Optional[str] = Field(default=None, min_length=3, max_length=64)
+    password: Optional[str] = Field(default=None, min_length=8, max_length=255)
 
 
 class UserOut(BaseModel):
